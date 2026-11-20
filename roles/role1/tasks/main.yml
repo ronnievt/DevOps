@@ -1,0 +1,66 @@
+---
+- name: Установить git, Docker и Docker Compose
+  apt:
+    name:
+      - git
+      - docker.io
+      - docker-compose
+    state: present
+    update_cache: yes
+  notify: restart docker
+  tags: start
+
+- name: Удалить старые каталоги приложения
+  file:
+    path: "{{ app_dir }}"
+    state: absent
+  tags: start
+
+- name: Создать чистый каталог для приложения
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    mode: '0755'
+  tags: start
+
+- name: склонировать репозиторий backend (ветка main)
+  git:
+    repo: "{{ backend_repo }}"
+    dest: "{{ app_dir }}/backend"
+    version: main
+    force: yes
+  tags: start
+
+- name: склонировать репозиторий frontend (ветка main)
+  git:
+    repo: "{{ frontend_repo }}"
+    dest: "{{ app_dir }}/frontend"
+    version: main
+    force: yes
+  tags: start
+
+- name: склонировать репозиторий DevOps
+  git:
+    repo: "{{ devops_repo }}"
+    dest: "{{ app_dir }}/devops"
+    version: main
+    force: yes
+  tags: start
+
+- name: Скопировать docker-compose.yml из DevOps в корень приложения
+  copy:
+    src: "{{ app_dir }}/devops/docker-compose.yml"
+    dest: "{{ app_dir }}/docker-compose.yml"
+    remote_src: yes
+  tags: start
+
+- name: Запустить микросервисы (docker compose up -d --build)
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_dir }}"
+    state: present
+    build: always
+  tags: start
+
+- name: Подключить файл с остановкой контейнеров
+  include_tasks: subtask.yml
+  tags: stop
