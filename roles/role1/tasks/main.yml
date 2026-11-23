@@ -4,7 +4,7 @@
     name:
       - git
       - docker.io
-      - docker-compose-plugin
+      - docker-compose
     state: present
     update_cache: yes
   notify: restart docker
