@@ -4,24 +4,24 @@
     name:
       - git
       - docker.io
-      - docker-compose
+      - docker-compose-plugin
     state: present
     update_cache: yes
   notify: restart docker
-  tags: start
+  tags: [start, prepare]
 
 - name: Удалить старые каталоги приложения
   file:
     path: "{{ app_dir }}"
     state: absent
-  tags: start
+  tags: [start, prepare]
 
 - name: Создать чистый каталог для приложения
   file:
     path: "{{ app_dir }}"
     state: directory
     mode: '0755'
-  tags: start
+  tags: [start, prepare]
 
 - name: склонировать репозиторий backend (ветка main)
   git:
@@ -29,7 +29,7 @@
     dest: "{{ app_dir }}/backend"
     version: main
     force: yes
-  tags: start
+  tags: [start, prepare]
 
 - name: склонировать репозиторий frontend (ветка main)
   git:
@@ -37,7 +37,7 @@
     dest: "{{ app_dir }}/frontend"
     version: main
     force: yes
-  tags: start
+  tags: [start, prepare]
 
 - name: склонировать репозиторий DevOps
   git:
@@ -45,21 +45,21 @@
     dest: "{{ app_dir }}/devops"
     version: main
     force: yes
-  tags: start
+  tags: [start, prepare]
 
 - name: Скопировать docker-compose.yml из DevOps в корень приложения
   copy:
     src: "{{ app_dir }}/devops/docker-compose.yml"
     dest: "{{ app_dir }}/docker-compose.yml"
     remote_src: yes
-  tags: start
+  tags: [start, prepare]
 
 - name: Запустить микросервисы (docker compose up -d --build)
   community.docker.docker_compose_v2:
     project_src: "{{ app_dir }}"
     state: present
     build: always
-  tags: start
+  tags: [start, deploy]
 
 - name: Подключить файл с остановкой контейнеров
   include_tasks: subtask.yml
