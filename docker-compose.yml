@@ -16,7 +16,7 @@ services:
       context: ./frontend
     image: frontend:v2.0
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - backend
     networks:
