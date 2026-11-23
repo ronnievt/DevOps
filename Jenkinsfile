@@ -4,27 +4,23 @@ pipeline {
     stages {
         stage('Подготовка окружения') {
             steps {
-                dir('ansible') {
-                    ansiblePlaybook(
-                        playbook: 'firstPlaybook.yml',
-                        inventory: 'inventory/stend1/hosts',
-                        credentialsId: 'ansible-ssh-keys',
-                        tags: 'prepare'
-                    )
-                }
+                ansiblePlaybook(
+                    playbook: 'firstPlaybook.yml',
+                    inventory: 'inventory/stend1/hosts',
+                    credentialsId: 'ansible-ssh-keys',
+                    tags: 'prepare'
+                )
             }
         }
 
         stage('Запуск приложений') {
             steps {
-                dir('ansible') {
-                    ansiblePlaybook(
-                        playbook: 'firstPlaybook.yml',
-                        inventory: 'inventory/stend1/hosts',
-                        credentialsId: 'ansible-ssh-keys',
-                        tags: 'deploy'
-                    )
-                }
+                ansiblePlaybook(
+                    playbook: 'firstPlaybook.yml',
+                    inventory: 'inventory/stend1/hosts',
+                    credentialsId: 'ansible-ssh-keys',
+                    tags: 'deploy'
+                )
             }
         }
     }
